@@ -11,6 +11,7 @@ import com.example.banco_app.model.Cuenta;
 @Repository
 public class CuentaRepository {
 	private final List<Cuenta> cuentas = new ArrayList<>();
+	
 	public List<Cuenta> obtenerCuentas(){
 		return cuentas;
 	}

@@ -1,5 +1,6 @@
 package com.example.banco_app.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +16,10 @@ public class ClienteService {
 		this.clienteRepository = clienteRepository;
 	}
 	
+	public List<Cliente> obtenerCliente() {
+		return clienteRepository.obtenerClientes();
+	}
+	
 	public Optional<Cliente> buscarPorNombre(String nombre){
 		return clienteRepository.buscarPorNombre(nombre); 
 	}
@@ -26,5 +31,7 @@ public class ClienteService {
 	public boolean eliminarCliente(String nombre) {
 		return clienteRepository.eliminarCliente(nombre);
 	}
+
+	
 
 }

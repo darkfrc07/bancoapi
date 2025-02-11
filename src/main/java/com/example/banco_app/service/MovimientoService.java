@@ -27,21 +27,26 @@ public class MovimientoService {
     public String agregarMovimiento(String numeroCuenta, Movimiento movimiento) {
         Optional<Cuenta> cuentaOpt = cuentaRepository.buscarPorNumero(numeroCuenta);
 
-        if (cuentaOpt.isPresent()) {
-            Cuenta cuenta = cuentaOpt.get();
-            double nuevoSaldo = movimiento.getTipo().equalsIgnoreCase("débito")
-                ? cuenta.getSaldo() - movimiento.getValor()
-                : cuenta.getSaldo() + movimiento.getValor();
-
-            if (nuevoSaldo < 0) {
-                return "Error: Saldo insuficiente.";
-            }
-
-            cuenta.setSaldo(nuevoSaldo);
-            movimientoRepository.agregarMovimiento(movimiento);
-            return "Movimiento registrado con éxito.";
+        if (!cuentaOpt.isPresent()) {
+            return "Error: Cuenta no encontrada.";
         }
-        return "Error: Cuenta no encontrada.";
+        
+        Cuenta cuenta = cuentaOpt.get();
+        double nuevoSaldo;
+        
+        if ("débito".equalsIgnoreCase(movimiento.getTipo())) {
+            nuevoSaldo = cuenta.getSaldo() - movimiento.getValor();
+        } else {
+            nuevoSaldo = cuenta.getSaldo() + movimiento.getValor();
+        }
+
+        if (nuevoSaldo < 0) {
+            return "Error: Saldo insuficiente.";
+        }
+
+        cuenta.setSaldo(nuevoSaldo);
+        movimientoRepository.agregarMovimiento(movimiento);
+        return "Movimiento registrado con éxito.";
     }
 }
 
