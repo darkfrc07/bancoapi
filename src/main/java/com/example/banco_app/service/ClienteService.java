@@ -24,10 +24,10 @@ public class ClienteService {
 		return clienteRepository.buscarPorNombre(nombre); 
 	}
 	
-	public void agregarCliente(Cliente cliente) {
-		clienteRepository.agregarCliente(cliente);
+	public Cliente agregarCliente(Cliente cliente) {
+		return clienteRepository.agregarCliente(cliente);
 	}
-	
+
 	public boolean eliminarCliente(String nombre) {
 		return clienteRepository.eliminarCliente(nombre);
 	}

@@ -3,6 +3,7 @@ package com.example.banco_app.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.banco_app.model.Cliente;
 import com.example.banco_app.service.ClienteService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/clientes")
@@ -45,9 +48,9 @@ public class ClienteController {
 
     // Endpoint para crear un nuevo cliente
     @PostMapping
-    public ResponseEntity<String> crearCliente(@RequestBody Cliente cliente) {
-        clienteService.agregarCliente(cliente);
-        return ResponseEntity.ok("Cliente creado correctamente");
+    public ResponseEntity<Cliente> crearCliente(@Valid @RequestBody Cliente cliente) {
+        Cliente nuevoCliente = clienteService.agregarCliente(cliente); // Guarda el cliente y obtiene el objeto con ID
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCliente);
     }
 
     // Endpoint para eliminar un cliente por nombre
