@@ -33,6 +33,11 @@ public class Cliente {
   
     private List<Cuenta> cuentas = new ArrayList<>();
     
+    // Método para agregar una cuenta al cliente
+    public void agregarCuenta(Cuenta cuenta) {
+        this.cuentas.add(cuenta);
+    }
+    
     public Long getId() {
         return id;
     }
