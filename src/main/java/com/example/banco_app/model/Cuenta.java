@@ -48,15 +48,16 @@ public class Cuenta {
     }
 
     public boolean registrarMovimiento(Movimiento movimiento) {
+        System.out.println("Registrando movimiento: " + movimiento.getTipo() + " - Valor: " + movimiento.getValor());
         if (movimiento.getTipo().equalsIgnoreCase("débito")) {
-            if (movimiento.getValor() > saldo) {
-                return false; // No se permite dejar saldo negativo
-            }
-            saldo -= movimiento.getValor();
+            saldo += movimiento.getValor(); // El débito debe sumar al saldo
+            System.out.println("Nuevo saldo después del débito: " + saldo);
         } else if (movimiento.getTipo().equalsIgnoreCase("crédito")) {
-            saldo += movimiento.getValor();
+            saldo -= movimiento.getValor(); // El crédito debe restar del saldo
+            System.out.println("Nuevo saldo después del crédito: " + saldo);
         }
         movimientos.add(movimiento);
         return true;
     }
+
 }

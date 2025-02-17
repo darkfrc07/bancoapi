@@ -22,6 +22,16 @@ public class CuentaRepository {
                 .filter(cuenta -> cuenta.getNumero().equalsIgnoreCase(numero))
                 .findFirst();
     }
+    
+    public boolean registrarMovimiento(String numero, Movimiento movimiento) {
+        Optional<Cuenta> cuentaOpt = buscarPorNumero(numero);
+        if (cuentaOpt.isPresent()) {
+            Cuenta cuenta = cuentaOpt.get();
+            return cuenta.registrarMovimiento(movimiento); // Se usa el método de Cuenta
+        }
+        return false;
+    }
+
 
     public void agregarCuenta(Cuenta cuenta) {
         cuentas.add(cuenta);
@@ -38,25 +48,7 @@ public class CuentaRepository {
         return cuentas.removeIf(cuenta -> cuenta.getNumero().equalsIgnoreCase(numero));
     }
 
-    // Registrar un movimiento en una cuenta
-    public boolean registrarMovimiento(String numero, Movimiento movimiento) {
-        Optional<Cuenta> cuentaOpt = buscarPorNumero(numero);
-        if (cuentaOpt.isPresent()) {
-            Cuenta cuenta = cuentaOpt.get();
-            if (movimiento.getTipo().equalsIgnoreCase("débito")) {
-                if (movimiento.getValor() > cuenta.getSaldo()) {
-                    return false; // Saldo insuficiente
-                }
-                cuenta.setSaldo(cuenta.getSaldo() - movimiento.getValor());
-            } else if (movimiento.getTipo().equalsIgnoreCase("crédito")) {
-                cuenta.setSaldo(cuenta.getSaldo() + movimiento.getValor());
-            }
-            cuenta.getMovimientos().add(movimiento);
-            return true;
-        }
-        return false;
-    }
-
+   
     // Obtener cuentas por cliente
     public List<Cuenta> obtenerCuentasPorCliente(Long clienteId) {
         return cuentas.stream()
@@ -81,18 +73,18 @@ public class CuentaRepository {
                     .filter(m -> m.getTipo().equalsIgnoreCase("débito"))
                     .mapToDouble(Movimiento::getValor).sum();
 
-            double sumCreditos = movimientosFiltrados.stream()
+            double restCreditos = movimientosFiltrados.stream()
                     .filter(m -> m.getTipo().equalsIgnoreCase("crédito"))
                     .mapToDouble(Movimiento::getValor).sum();
 
             totalDebitos += sumDebitos;
-            totalCreditos += sumCreditos;
+            totalCreditos -= restCreditos;
 
             Map<String, Object> cuentaData = new HashMap<>();
             cuentaData.put("numeroCuenta", cuenta.getNumero());
             cuentaData.put("saldo", cuenta.getSaldo());
             cuentaData.put("debitos", sumDebitos);
-            cuentaData.put("creditos", sumCreditos);
+            cuentaData.put("creditos", restCreditos);
             cuentasReporte.add(cuentaData);
         }
 

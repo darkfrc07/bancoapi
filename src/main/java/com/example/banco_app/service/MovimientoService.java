@@ -25,28 +25,40 @@ public class MovimientoService {
     }
 
     public String agregarMovimiento(String numeroCuenta, Movimiento movimiento) {
+        // Buscar la cuenta por número
         Optional<Cuenta> cuentaOpt = cuentaRepository.buscarPorNumero(numeroCuenta);
 
         if (!cuentaOpt.isPresent()) {
             return "Error: Cuenta no encontrada.";
         }
-        
+
+        // Obtener la cuenta y verificar el tipo de movimiento
         Cuenta cuenta = cuentaOpt.get();
         double nuevoSaldo;
-        
-        if ("débito".equalsIgnoreCase(movimiento.getTipo())) {
-            nuevoSaldo = cuenta.getSaldo() - movimiento.getValor();
-        } else {
-            nuevoSaldo = cuenta.getSaldo() + movimiento.getValor();
+
+        // Validar tipo de movimiento
+        if (movimiento.getTipo() == null || (!movimiento.getTipo().equalsIgnoreCase("débito") && !movimiento.getTipo().equalsIgnoreCase("crédito"))) {
+            return "Error: Tipo de movimiento inválido.";
         }
 
+        // Calcular nuevo saldo según el tipo de movimiento (invertido)
+        if ("débito".equalsIgnoreCase(movimiento.getTipo())) {
+            nuevoSaldo = cuenta.getSaldo() + movimiento.getValor(); // Sumar para débito
+        } else { // Si es crédito
+            nuevoSaldo = cuenta.getSaldo() - movimiento.getValor(); // Restar para crédito
+        }
+
+        // Verificar que el nuevo saldo no sea negativo
         if (nuevoSaldo < 0) {
             return "Error: Saldo insuficiente.";
         }
 
+        // Actualizar saldo y registrar el movimiento
         cuenta.setSaldo(nuevoSaldo);
         movimientoRepository.agregarMovimiento(movimiento);
+
         return "Movimiento registrado con éxito.";
     }
+
 }
 

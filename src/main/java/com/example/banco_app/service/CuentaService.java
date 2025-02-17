@@ -74,9 +74,9 @@ public class CuentaService {
             if (movimiento.getValor() > cuenta.getSaldo()) {
                 throw new RuntimeException("Saldo insuficiente para realizar el débito.");
             }
-            cuenta.setSaldo(cuenta.getSaldo() - movimiento.getValor());
-        } else if (tipoMovimiento.equals("crédito")) {
             cuenta.setSaldo(cuenta.getSaldo() + movimiento.getValor());
+        } else if (tipoMovimiento.equals("crédito")) {
+            cuenta.setSaldo(cuenta.getSaldo() - movimiento.getValor());
         } else {
             throw new IllegalArgumentException("El tipo de movimiento debe ser 'débito' o 'crédito'.");
         }

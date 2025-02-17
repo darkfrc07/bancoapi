@@ -7,6 +7,9 @@ public class Movimiento {
 	private LocalDate fecha;
 	private double valor;
 	
+	public Movimiento(String string, double d) {
+		// TODO Auto-generated constructor stub
+	}
 	public String getTipo() {
 		return tipo;
 	}
