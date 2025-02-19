@@ -11,7 +11,7 @@ import com.example.banco_app.model.Movimiento;
 public class MovimientoRepository {
     private static final String URL = "jdbc:mysql://localhost:3306/banco_db";
     private static final String USER = "root";
-    private static final String PASSWORD = "juliana09*";
+    private static final String PASSWORD = "tu_contraseña"; // Cambia esto
 
     public Long agregarMovimiento(String numeroCuenta, Movimiento movimiento) {
         String queryInsert = "INSERT INTO movimientos (numero_cuenta, tipo, fecha, valor) VALUES (?, ?, ?, ?)";
@@ -53,7 +53,7 @@ public class MovimientoRepository {
 
     public List<Movimiento> obtenerMovimientos() {
         List<Movimiento> movimientos = new ArrayList<>();
-        String query = "SELECT id, tipo, fecha, valor FROM movimientos";
+        String query = "SELECT id, tipo, fecha, valor, numero_cuenta FROM movimientos";
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = connection.prepareStatement(query);
@@ -64,7 +64,8 @@ public class MovimientoRepository {
                         rs.getLong("id"),
                         rs.getString("tipo"),
                         rs.getDate("fecha").toLocalDate(),
-                        rs.getDouble("valor")
+                        rs.getDouble("valor"),
+                        rs.getString("numero_cuenta")
                 );
                 movimientos.add(movimiento);
             }

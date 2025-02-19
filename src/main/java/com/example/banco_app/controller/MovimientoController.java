@@ -20,8 +20,8 @@ public class MovimientoController {
         return movimientoService.obtenerTodos();
     }
 
-    @PostMapping("/{numeroCuenta}")
-    public String agregarMovimiento(@PathVariable String numeroCuenta, @RequestBody Movimiento movimiento) {
-        return movimientoService.agregarMovimiento(numeroCuenta, movimiento);
+    @PostMapping
+    public String agregarMovimiento(@RequestBody Movimiento movimiento) {
+        return movimientoService.agregarMovimiento(movimiento.getNumeroCuenta(), movimiento);
     }
 }
