@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-
 import com.example.banco_app.model.Cuenta;
 import com.example.banco_app.model.Movimiento;
 import com.example.banco_app.repository.CuentaRepository;
@@ -25,40 +24,36 @@ public class MovimientoService {
     }
 
     public String agregarMovimiento(String numeroCuenta, Movimiento movimiento) {
-        // Buscar la cuenta por número
         Optional<Cuenta> cuentaOpt = cuentaRepository.buscarPorNumero(numeroCuenta);
 
         if (!cuentaOpt.isPresent()) {
             return "Error: Cuenta no encontrada.";
         }
 
-        // Obtener la cuenta y verificar el tipo de movimiento
         Cuenta cuenta = cuentaOpt.get();
         double nuevoSaldo;
 
-        // Validar tipo de movimiento
-        if (movimiento.getTipo() == null || (!movimiento.getTipo().equalsIgnoreCase("débito") && !movimiento.getTipo().equalsIgnoreCase("crédito"))) {
-            return "Error: Tipo de movimiento inválido.";
-        }
-
-        // Calcular nuevo saldo según el tipo de movimiento (invertido)
+        // Ajuste correcto: Débito resta y Crédito suma
         if ("débito".equalsIgnoreCase(movimiento.getTipo())) {
-            nuevoSaldo = cuenta.getSaldo() + movimiento.getValor(); // Sumar para débito
-        } else { // Si es crédito
-            nuevoSaldo = cuenta.getSaldo() - movimiento.getValor(); // Restar para crédito
+            nuevoSaldo = cuenta.getSaldo() - movimiento.getValor();
+        } else { 
+            nuevoSaldo = cuenta.getSaldo() + movimiento.getValor();
         }
 
-        // Verificar que el nuevo saldo no sea negativo
         if (nuevoSaldo < 0) {
             return "Error: Saldo insuficiente.";
         }
 
-        // Actualizar saldo y registrar el movimiento
+        // Registrar el movimiento en la BDD
+        Long movimientoId = movimientoRepository.agregarMovimiento(numeroCuenta, movimiento);
+        if (movimientoId == null) {
+            return "Error al registrar el movimiento.";
+        }
+
+        // Actualizar saldo en la cuenta
         cuenta.setSaldo(nuevoSaldo);
-        movimientoRepository.agregarMovimiento(movimiento);
+        cuentaRepository.actualizarCuenta(numeroCuenta, nuevoSaldo);
 
-        return "Movimiento registrado con éxito.";
+        return "Movimiento registrado con éxito. ID: " + movimientoId;
     }
-
 }
-

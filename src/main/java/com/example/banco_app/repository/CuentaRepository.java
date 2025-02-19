@@ -1,98 +1,57 @@
 package com.example.banco_app.repository;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.example.banco_app.model.Cuenta;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.example.banco_app.model.Cuenta;
-import com.example.banco_app.model.Movimiento;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class CuentaRepository {
-    private final List<Cuenta> cuentas = new ArrayList<>();
+    private final JdbcTemplate jdbcTemplate;
+
+    public CuentaRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public List<Cuenta> obtenerCuentas() {
-        return cuentas;
+        String sql = "SELECT * FROM cuenta";
+        return jdbcTemplate.query(sql, new CuentaRowMapper());
     }
 
     public Optional<Cuenta> buscarPorNumero(String numero) {
-        return cuentas.stream()
-                .filter(cuenta -> cuenta.getNumero().equalsIgnoreCase(numero))
-                .findFirst();
+        String sql = "SELECT * FROM cuenta WHERE numero = ?";
+        List<Cuenta> cuentas = jdbcTemplate.query(sql, new CuentaRowMapper(), numero);
+        return cuentas.stream().findFirst();
     }
-    
-    public boolean registrarMovimiento(String numero, Movimiento movimiento) {
-        Optional<Cuenta> cuentaOpt = buscarPorNumero(numero);
-        if (cuentaOpt.isPresent()) {
-            Cuenta cuenta = cuentaOpt.get();
-            return cuenta.registrarMovimiento(movimiento); // Se usa el método de Cuenta
-        }
-        return false;
-    }
-
 
     public void agregarCuenta(Cuenta cuenta) {
-        cuentas.add(cuenta);
+        String sql = "INSERT INTO cuenta (numero, saldo, cliente_id) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, cuenta.getNumero(), cuenta.getSaldo(), cuenta.getClienteId());
     }
 
-    public Optional<Cuenta> actualizarCuenta(String numero, Cuenta cuentaActualizada) {
-        return buscarPorNumero(numero).map(cuenta -> {
-            cuenta.setSaldo(cuentaActualizada.getSaldo());
-            return cuenta;
-        });
+    public int actualizarCuenta(String numero, double saldo) {
+        String sql = "UPDATE cuenta SET saldo = ? WHERE numero = ?";
+        return jdbcTemplate.update(sql, saldo, numero);
     }
 
-    public boolean eliminarCuenta(String numero) {
-        return cuentas.removeIf(cuenta -> cuenta.getNumero().equalsIgnoreCase(numero));
+    public int eliminarCuenta(String numero) {
+        String sql = "DELETE FROM cuenta WHERE numero = ?";
+        return jdbcTemplate.update(sql, numero);
     }
 
-   
-    // Obtener cuentas por cliente
-    public List<Cuenta> obtenerCuentasPorCliente(Long clienteId) {
-        return cuentas.stream()
-                .filter(cuenta -> cuenta.getClienteId().equals(clienteId))
-                .collect(Collectors.toList());
-    }
-
-    // Generar reporte de cuentas con movimientos en un rango de fechas
-    public Map<String, Object> generarReporte(Long clienteId, LocalDate fechaInicio, LocalDate fechaFin) {
-        List<Cuenta> cuentasCliente = obtenerCuentasPorCliente(clienteId);
-
-        List<Map<String, Object>> cuentasReporte = new ArrayList<>();
-        double totalDebitos = 0;
-        double totalCreditos = 0;
-
-        for (Cuenta cuenta : cuentasCliente) {
-            List<Movimiento> movimientosFiltrados = cuenta.getMovimientos().stream()
-                    .filter(mov -> !mov.getFecha().isBefore(fechaInicio) && !mov.getFecha().isAfter(fechaFin))
-                    .collect(Collectors.toList());
-
-            double sumDebitos = movimientosFiltrados.stream()
-                    .filter(m -> m.getTipo().equalsIgnoreCase("débito"))
-                    .mapToDouble(Movimiento::getValor).sum();
-
-            double restCreditos = movimientosFiltrados.stream()
-                    .filter(m -> m.getTipo().equalsIgnoreCase("crédito"))
-                    .mapToDouble(Movimiento::getValor).sum();
-
-            totalDebitos += sumDebitos;
-            totalCreditos -= restCreditos;
-
-            Map<String, Object> cuentaData = new HashMap<>();
-            cuentaData.put("numeroCuenta", cuenta.getNumero());
-            cuentaData.put("saldo", cuenta.getSaldo());
-            cuentaData.put("debitos", sumDebitos);
-            cuentaData.put("creditos", restCreditos);
-            cuentasReporte.add(cuentaData);
+    private static class CuentaRowMapper implements RowMapper<Cuenta> {
+        @Override
+        public Cuenta mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new Cuenta(
+                rs.getString("numero"),
+                rs.getDouble("saldo"),
+                rs.getLong("cliente_id")
+            );
         }
-
-        Map<String, Object> reporte = new HashMap<>();
-        reporte.put("clienteId", clienteId);
-        reporte.put("cuentas", cuentasReporte);
-        reporte.put("totalDebitos", totalDebitos);
-        reporte.put("totalCreditos", totalCreditos);
-        return reporte;
     }
 }
