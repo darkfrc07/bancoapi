@@ -16,7 +16,7 @@ Asegúrate de tener instalados en tu máquina:
 - **MySQL Server**
 - **Postman** (opcional, para probar la API)
 
-## ⚙️ Configuración
+## Configuración
 
 ### Clonar el repositorio
 ```sh
@@ -25,11 +25,11 @@ cd bancoapi
 
 ### Configurar la base de datos
 
-Crea una base de datos en MySQL llamada banco_db y actualiza el archivo application.properties con tus credenciales:
+Crea una base de datos en MySQL llamada banco_db y actualiza el archivo application.properties con las credenciales:
 
 spring.datasource.url=jdbc:mysql://localhost:3306/banco_db
-spring.datasource.username=tu_usuario
-spring.datasource.password=tu_contraseña
+spring.datasource.username=root
+spring.datasource.password=juliana09*
 
 Construir y ejecutar el proyecto
 
@@ -45,8 +45,9 @@ GET	/cuentas/{id}	Obtener cuenta por ID
 POST	/movimientos	Registrar un movimiento
 GET	/movimientos/reporte	Generar reporte por fechas
 
-
-Método	URL	:
+https://documenter.getpostman.com/view/33439515/2sAYdcssZp
+Para POSTMAN
+Método	URL:
 CLIENTES
 
 GET:http://localhost:8080/cliente 
@@ -85,7 +86,7 @@ http://localhost:8080/movimientos
   "fecha": "2024-02-16"
 }
 
- Pruebas
+Pruebas
 
 Para ejecutar las pruebas unitarias:
 
