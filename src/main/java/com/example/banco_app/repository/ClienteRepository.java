@@ -3,6 +3,7 @@ package com.example.banco_app.repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -28,7 +29,7 @@ public class ClienteRepository {
 
     @Transactional
     public Cliente agregarCliente(Cliente cliente) {
-        String sql = "INSERT INTO clientes (nombre, direccion, telefono) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO cliente (nombre, direccion, telefono) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {
@@ -45,66 +46,66 @@ public class ClienteRepository {
             }
         } catch (DataAccessException e) {
             log.error("Error al agregar cliente: {}", cliente, e);
+            throw e;
         }
+
         return cliente;
     }
 
     public List<Cliente> obtenerClientes() {
-        String sql = "SELECT id, nombre, direccion, telefono FROM clientes";
+        String sql = "SELECT id, nombre, direccion, telefono FROM cliente";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Cliente.class));
     }
 
     public Optional<Cliente> buscarPorId(Long id) {
-        String sql = "SELECT id, nombre, direccion, telefono FROM clientes WHERE id = ?";
+        String sql = "SELECT id, nombre, direccion, telefono FROM cliente WHERE id = ?";
         try {
             Cliente cliente = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Cliente.class), id);
-            return Optional.ofNullable(cliente);
-        } catch (DataAccessException e) {
+            return Optional.of(cliente);
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Cliente no encontrado con ID: {}", id);
             return Optional.empty();
+        } catch (DataAccessException e) {
+            log.error("Error al buscar cliente con ID: {}", id, e);
+            throw new RuntimeException("Error en la base de datos", e);
         }
     }
 
     @Transactional
     public Optional<Cliente> actualizarCliente(Long id, Cliente clienteActualizado) {
-        String sql = "UPDATE clientes SET nombre = ?, direccion = ?, telefono = ? WHERE id = ?";
-        int filasActualizadas = jdbcTemplate.update(sql,
+        String sql = "UPDATE cliente SET nombre = ?, direccion = ?, telefono = ? WHERE id = ?";
+        
+        int filasAfectadas = jdbcTemplate.update(sql,
                 clienteActualizado.getNombre(),
                 clienteActualizado.getDireccion(),
                 clienteActualizado.getTelefono(),
                 id);
-        return filasActualizadas > 0 ? buscarPorId(id) : Optional.empty();
+
+        if (filasAfectadas > 0) {
+            clienteActualizado.setId(id);
+            return Optional.of(clienteActualizado);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Transactional
     public boolean eliminarClientePorId(Long id) {
-        String sql = "DELETE FROM clientes WHERE id = ?";
-        try {
-            return jdbcTemplate.update(sql, id) > 0;
-        } catch (DataAccessException e) {
-            log.error("Error al eliminar cliente con ID: {}", id, e);
-            return false;
-        }
+        String sql = "DELETE FROM cliente WHERE id = ?";
+        return jdbcTemplate.update(sql, id) > 0;
     }
-
+    
     @Transactional
     public boolean asignarCuenta(Long clienteId, Long cuentaId) {
         String sql = "UPDATE cuenta SET cliente_id = ? WHERE id = ?";
-        if (buscarPorId(clienteId).isEmpty() || buscarCuentaPorId(cuentaId).isEmpty()) {
-            log.warn("Asignación fallida: Cliente ID {} o Cuenta ID {} no existen", clienteId, cuentaId);
-            return false;
+        
+        try {
+            int filasAfectadas = jdbcTemplate.update(sql, clienteId, cuentaId);
+            return filasAfectadas > 0;
+        } catch (DataAccessException e) {
+            log.error("Error al asignar la cuenta {} al cliente {}", cuentaId, clienteId, e);
+            throw new RuntimeException("Error en la base de datos al asignar cuenta", e);
         }
-        return jdbcTemplate.update(sql, clienteId, cuentaId) > 0;
     }
 
-    private Optional<Long> buscarCuentaPorId(Long cuentaId) {
-        String sql = "SELECT id FROM cuenta WHERE id = ?";
-        try {
-            Long id = jdbcTemplate.queryForObject(sql, Long.class, cuentaId);
-            return Optional.ofNullable(id);
-        } catch (DataAccessException e) {
-            log.warn("Cuenta no encontrada con ID: {}", cuentaId);
-            return Optional.empty();
-        }
-    }
 }

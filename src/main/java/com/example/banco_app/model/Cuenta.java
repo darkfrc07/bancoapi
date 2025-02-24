@@ -1,39 +1,50 @@
 package com.example.banco_app.model;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class Cuenta {
+    @NotBlank(message = "El número de cuenta no puede estar vacío")
     private String numero;
+
+    @Min(value = 0, message = "El saldo no puede ser negativo")
     private double saldo;
-    private Long clienteId;
-    
+
+    @NotNull(message = "El ID del cliente es obligatorio")
+    private Long idCliente;
+
+    // Constructor vacío
     public Cuenta() {}
 
-    public Cuenta(String numero, double saldo, Long clienteId) {
+    // Constructor con parámetros
+    public Cuenta(String numero, double saldo, Long idCliente) {
         this.numero = numero;
         this.saldo = saldo;
-        this.clienteId = clienteId;
+        this.idCliente = idCliente;
     }
 
-    public String getNumero() {
-        return numero;
+    // Getters y Setters
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
+
+    public double getSaldo() { return saldo; }
+    public void setSaldo(double saldo) { 
+        if (saldo < 0) {
+            throw new IllegalArgumentException("El saldo no puede ser negativo");
+        }
+        this.saldo = saldo; 
     }
 
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
+    public Long getClienteId() { return idCliente; }
+    public void setClienteId(Long idCliente) { this.idCliente = idCliente; }
 
-    public double getSaldo() {
-        return saldo;
-    }
-
-    public void setSaldo(double saldo) {
-        this.saldo = saldo;
-    }
-
-    public Long getClienteId() {
-        return clienteId;
-    }
-
-    public void setClienteId(Long clienteId) {
-        this.clienteId = clienteId;
+    @Override
+    public String toString() {
+        return "Cuenta{" +
+                "numero='" + numero + '\'' +
+                ", saldo=" + saldo +
+                ", idCliente=" + idCliente +
+                '}';
     }
 }

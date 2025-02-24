@@ -2,10 +2,14 @@ package com.example.banco_app.controller;
 
 import com.example.banco_app.model.Cuenta;
 import com.example.banco_app.service.CuentaService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -18,8 +22,9 @@ public class CuentaController {
     }
 
     @GetMapping
-    public List<Cuenta> obtenerCuentas() {
-        return cuentaService.obtenerTodasLasCuentas();
+    public ResponseEntity<List<Cuenta>> obtenerCuentas() {
+        List<Cuenta> cuentas = cuentaService.obtenerTodasLasCuentas();
+        return ResponseEntity.ok(cuentas);
     }
 
     @GetMapping("/{numero}")
@@ -29,19 +34,25 @@ public class CuentaController {
     }
 
     @PostMapping
-    public void crearCuenta(@RequestBody Cuenta cuenta) {
-        cuentaService.crearCuenta(cuenta);
+    public ResponseEntity<String> crearCuenta(@RequestBody Cuenta cuenta) {
+        return cuentaService.crearCuenta(cuenta);
     }
 
     @PutMapping("/{numero}")
-    public ResponseEntity<Void> actualizarSaldo(@PathVariable String numero, @RequestParam double saldo) {
-        boolean actualizado = cuentaService.actualizarSaldo(numero, saldo);
-        return actualizado ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<String> actualizarSaldo(@PathVariable String numero, @RequestBody Cuenta cuenta) {
+        boolean actualizado = cuentaService.actualizarSaldo(numero, cuenta.getSaldo());
+
+        return actualizado 
+            ? ResponseEntity.ok("Saldo actualizado con éxito.") 
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Cuenta no encontrada.");
     }
 
+
     @DeleteMapping("/{numero}")
-    public ResponseEntity<Void> eliminarCuenta(@PathVariable String numero) {
+    public ResponseEntity<String> eliminarCuenta(@PathVariable String numero) {
         boolean eliminado = cuentaService.eliminarCuenta(numero);
-        return eliminado ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        return eliminado 
+            ? ResponseEntity.ok("Cuenta eliminada correctamente.") 
+            : ((BodyBuilder) ResponseEntity.notFound()).body("Error: Cuenta no encontrada.");
     }
 }

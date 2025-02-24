@@ -1,17 +1,20 @@
 package com.example.banco_app.repository;
 
 import com.example.banco_app.model.Cuenta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class CuentaRepository {
+    private static final Logger log = LoggerFactory.getLogger(CuentaRepository.class);
     private final JdbcTemplate jdbcTemplate;
 
     public CuentaRepository(JdbcTemplate jdbcTemplate) {
@@ -30,28 +33,50 @@ public class CuentaRepository {
     }
 
     public void agregarCuenta(Cuenta cuenta) {
-        String sql = "INSERT INTO cuenta (numero, saldo, cliente_id) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, cuenta.getNumero(), cuenta.getSaldo(), cuenta.getClienteId());
+        String sql = "INSERT INTO cuenta (numero, saldo, id_cliente) VALUES (?, ?, ?)";
+        try {
+            jdbcTemplate.update(sql, cuenta.getNumero(), cuenta.getSaldo(), cuenta.getClienteId());
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException("Error: El número de cuenta ya existe.");
+        }
     }
 
-    public int actualizarCuenta(String numero, double saldo) {
+    public int actualizarCuenta(String numeroCuenta, double nuevoSaldo) {
+        log.info("Intentando actualizar saldo de la cuenta '{}'", numeroCuenta);
+
+        long inicio = System.currentTimeMillis();
+
         String sql = "UPDATE cuenta SET saldo = ? WHERE numero = ?";
-        return jdbcTemplate.update(sql, saldo, numero);
+        int filas = jdbcTemplate.update(sql, nuevoSaldo, numeroCuenta);
+
+        long fin = System.currentTimeMillis();
+        log.info("Tiempo de ejecución del UPDATE: {} ms", (fin - inicio));
+
+        if (filas == 0) {
+            log.warn("No se encontró la cuenta con número: '{}'", numeroCuenta);
+        } else {
+            log.info("Saldo actualizado con éxito. Filas afectadas: {}", filas);
+        }
+
+        return filas;
     }
+
 
     public int eliminarCuenta(String numero) {
         String sql = "DELETE FROM cuenta WHERE numero = ?";
         return jdbcTemplate.update(sql, numero);
     }
 
-    private static class CuentaRowMapper implements RowMapper<Cuenta> {
+    private static class CuentaRowMapper implements RowMapper<Cuenta> { 
         @Override
-        public Cuenta mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Cuenta(
-                rs.getString("numero"),
-                rs.getDouble("saldo"),
-                rs.getLong("cliente_id")
-            );
+        public Cuenta mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
+            Cuenta cuenta = new Cuenta();
+            cuenta.setNumero(rs.getString("numero"));  // ✅ Número es la clave primaria
+            cuenta.setSaldo(rs.getDouble("saldo"));
+            cuenta.setClienteId(rs.getLong("id_cliente")); // 🔹 Aquí se asigna correctamente el id_cliente
+            return cuenta;
         }
     }
-}
+
+
+    }
