@@ -41,7 +41,7 @@ class MovimientoRepositoryTest {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
         when(jdbcTemplate.update(any(), any(KeyHolder.class))).thenAnswer(invocation -> {
-            keyHolder.getKeyList().add(java.util.Map.of("id", 1L)); // Simular ID generado
+            keyHolder.getKeyList().add(java.util.Map.of("id", 1L)); 
             return 1;
         });
 

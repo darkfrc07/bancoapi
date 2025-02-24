@@ -27,7 +27,7 @@ class CuentaTest {
 
         assertEquals("123456789", cuenta.getNumero());
         assertEquals(1000.0, cuenta.getSaldo());
-        assertEquals(Long.valueOf(1), cuenta.getClienteId()); // Cambio de comparación
+        assertEquals(Long.valueOf(1), cuenta.getClienteId());
     }
 
     @Test

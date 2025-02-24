@@ -14,17 +14,14 @@ public class Cuenta {
     @NotNull(message = "El ID del cliente es obligatorio")
     private Long idCliente;
 
-    // Constructor vacío
     public Cuenta() {}
 
-    // Constructor con parámetros
     public Cuenta(String numero, double saldo, Long idCliente) {
         this.numero = numero;
         this.saldo = saldo;
         this.idCliente = idCliente;
     }
 
-    // Getters y Setters
     public String getNumero() { return numero; }
     public void setNumero(String numero) { this.numero = numero; }
 

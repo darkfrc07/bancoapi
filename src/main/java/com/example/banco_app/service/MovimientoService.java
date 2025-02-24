@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.example.banco_app.model.Cuenta;
 import com.example.banco_app.model.Movimiento;
@@ -17,8 +14,6 @@ import com.example.banco_app.repository.MovimientoRepository;
 
 @Service
 public class MovimientoService {
-    private static final Logger log = LoggerFactory.getLogger(MovimientoService.class);
-
     private final MovimientoRepository movimientoRepository;
     private final CuentaRepository cuentaRepository;
 
@@ -30,12 +25,12 @@ public class MovimientoService {
     public List<Movimiento> obtenerTodos() {
         return movimientoRepository.obtenerMovimientos();
     }
-    
+
     public List<Movimiento> buscarPorNumeroCuenta(String numeroCuenta) {
         return movimientoRepository.buscarPorNumeroCuenta(numeroCuenta);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public String agregarMovimiento(String numeroCuenta, Movimiento movimiento) {
         Optional<Cuenta> cuentaOpt = cuentaRepository.buscarPorNumero(numeroCuenta);
         if (!cuentaOpt.isPresent()) {
@@ -50,12 +45,12 @@ public class MovimientoService {
             movimiento.setFecha(LocalDate.now());
         }
 
-        if ("credito".equals(tipoNormalizado)) { 
+        if ("debito".equals(tipoNormalizado)) { 
             if (cuenta.getSaldo() < movimiento.getValor()) {
                 return "Error: Saldo insuficiente.";
             }
             nuevoSaldo -= movimiento.getValor();
-        } else if ("debito".equals(tipoNormalizado)) { 
+        } else if ("credito".equals(tipoNormalizado)) { 
             nuevoSaldo += movimiento.getValor();
         } else {
             return "Error: Tipo de movimiento inválido.";
@@ -91,14 +86,14 @@ public class MovimientoService {
         double saldoActual = cuenta.getSaldo();
         double saldoRevertido = saldoActual;
 
-        if (movimientoExistente.getTipo().equalsIgnoreCase("credito")) {
+        if (movimientoExistente.getTipo().equalsIgnoreCase("debito")) {
             saldoRevertido += movimientoExistente.getValor();
         } else {
             saldoRevertido -= movimientoExistente.getValor();
         }
 
         double nuevoSaldo = saldoRevertido;
-        if (movimientoActualizado.getTipo().equalsIgnoreCase("credito")) {
+        if (movimientoActualizado.getTipo().equalsIgnoreCase("debito")) {
             if (nuevoSaldo < movimientoActualizado.getValor()) {
                 return "Error: Saldo insuficiente para actualizar.";
             }
@@ -109,14 +104,14 @@ public class MovimientoService {
 
         int filasActualizadasCuenta = cuentaRepository.actualizarCuenta(cuenta.getNumero(), nuevoSaldo);
         if (filasActualizadasCuenta == 0) {
-            return "Error: No se pudo actualizar el saldo de la cuenta.";
+            return "Error: No se pudo actualizar el saldo de la cuenta";
         }
 
         int filasActualizadasMovimiento = movimientoRepository.actualizarMovimiento(id, movimientoActualizado);
         if (filasActualizadasMovimiento == 0) {
-            return "Error: No se pudo actualizar el movimiento.";
+            return "Error: No se pudo actualizar el movimiento";
         }
 
-        return "Movimiento actualizado con éxito.";
+        return "Movimiento actualizado con exito";
     }
 }

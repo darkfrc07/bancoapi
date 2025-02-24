@@ -67,7 +67,7 @@ public class CuentaRepository {
         return jdbcTemplate.update(sql, numero);
     }
 
-    private static class CuentaRowMapper implements RowMapper<Cuenta> { 
+    public static class CuentaRowMapper implements RowMapper<Cuenta> { 
         @Override
         public Cuenta mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
             Cuenta cuenta = new Cuenta();

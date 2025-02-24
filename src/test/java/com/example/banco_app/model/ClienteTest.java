@@ -53,15 +53,12 @@ class ClienteTest {
 
         Set<ConstraintViolation<Cliente>> violations = validator.validate(cliente);
 
-        // Verificamos que hay exactamente 3 violaciones
         assertEquals(3, violations.size());
 
-        // Extraemos los mensajes de error
         Set<String> messages = violations.stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.toSet());
 
-        // Comprobamos que los mensajes sean los correctos
         assertTrue(messages.contains("El nombre es obligatorio"));
         assertTrue(messages.contains("La dirección es obligatoria"));
         assertTrue(messages.contains("El teléfono es obligatorio"));

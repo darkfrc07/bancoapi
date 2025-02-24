@@ -14,8 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class) // Asegura que JUnit maneje las inyecciones de Spring
-@WebMvcTest(ChuckNorrisController.class) // Carga solo el controlador
+@ExtendWith(SpringExtension.class) 
+@WebMvcTest(ChuckNorrisController.class) 
 public class ChuckNorrisControllerTest {
 
     @Autowired

@@ -23,40 +23,35 @@ public class Movimiento {
     @NotBlank(message = "El número de cuenta es obligatorio")
     private String numeroCuenta;
 
-    public Movimiento(String string, double d) {}
+    public Movimiento() {}
 
-    // Constructor completo
     public Movimiento(Long id, String tipo, LocalDate fecha, double valor, String numeroCuenta) {
         this.id = id;
         this.tipo = tipo;
-        this.fecha = fecha != null ? fecha : LocalDate.now(); // Si es null, usa la fecha actual
+        this.fecha = (fecha != null) ? fecha : LocalDate.now(); // Usa la fecha actual si es null
         this.valor = valor;
         this.numeroCuenta = numeroCuenta;
     }
 
-    // Constructor sin ID (para inserciones)
     public Movimiento(String tipo, double valor, String numeroCuenta) {
-        this.tipo = tipo;
-        this.valor = valor;
-        this.fecha = LocalDate.now();
-        this.numeroCuenta = numeroCuenta;
+        this(null, tipo, LocalDate.now(), valor, numeroCuenta);
     }
 
-	public Long getId() { return id; }
+    public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
 
     public LocalDate getFecha() { return fecha; }
-    public void setFecha(@NotNull(message = "La fecha no puede ser nula") LocalDate string) { this.fecha = string; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
 
     public double getValor() { return valor; }
-    public void setValor(double valor) { 
+    public void setValor(double valor) {
         if (valor < 0) {
             throw new IllegalArgumentException("El valor del movimiento no puede ser negativo");
         }
-        this.valor = valor; 
+        this.valor = valor;
     }
 
     public String getNumeroCuenta() { return numeroCuenta; }
@@ -72,4 +67,5 @@ public class Movimiento {
                 ", numeroCuenta='" + numeroCuenta + '\'' +
                 '}';
     }
+    
 }

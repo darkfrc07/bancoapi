@@ -19,10 +19,8 @@ public class Cliente {
     @Size(max = 15, message = "El teléfono no puede tener más de 15 caracteres")
     private String telefono;
 
-    // Constructor vacío
     public Cliente() {}
 
-    // Constructor con parámetros
     public Cliente(Long id, String nombre, String direccion, String telefono) {
         this.id = id;
         this.nombre = nombre;
@@ -30,7 +28,6 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    // Getters
     public Long getId() {
         return id;
     }
@@ -47,7 +44,6 @@ public class Cliente {
         return telefono;
     }
 
-    // Setters con @Valid para validación
     public void setId(Long id) {
         this.id = id;
     }

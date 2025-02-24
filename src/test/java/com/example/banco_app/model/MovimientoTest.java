@@ -24,7 +24,7 @@ class MovimientoTest {
     void testMovimientoCreacion() {
         Movimiento movimiento = new Movimiento(1L, "DEBITO", LocalDate.of(2024, 2, 21), 500.0, "123456789");
 
-        assertEquals(Long.valueOf(1), movimiento.getId()); // Corrección de comparación
+        assertEquals(Long.valueOf(1), movimiento.getId()); 
         assertEquals("DEBITO", movimiento.getTipo());
         assertEquals(LocalDate.of(2024, 2, 21), movimiento.getFecha());
         assertEquals(500.0, movimiento.getValor());
