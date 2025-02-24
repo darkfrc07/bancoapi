@@ -9,7 +9,7 @@ Este es el backend de una aplicación bancaria desarrollado con **Spring Boot** 
 - JDBC
 - JUnit (para pruebas)
 
-## 📌 Requisitos previos
+## Requisitos previos
 Asegúrate de tener instalados en tu máquina:
 - **JDK 17** o superior
 - **Maven**
@@ -18,7 +18,7 @@ Asegúrate de tener instalados en tu máquina:
 
 ## ⚙️ Configuración
 
-### 1️⃣ Clonar el repositorio
+### Clonar el repositorio
 ```sh
 git clone https://github.com/darkfrc07/bancoapi.git
 cd bancoapi
@@ -31,7 +31,7 @@ spring.datasource.url=jdbc:mysql://localhost:3306/banco_db
 spring.datasource.username=tu_usuario
 spring.datasource.password=tu_contraseña
 
-3️⃣ Construir y ejecutar el proyecto
+Construir y ejecutar el proyecto
 
 mvn clean install
 mvn spring-boot:run
@@ -85,8 +85,7 @@ http://localhost:8080/movimientos
   "fecha": "2024-02-16"
 }
 
-
-🧪 Pruebas
+ Pruebas
 
 Para ejecutar las pruebas unitarias:
 
