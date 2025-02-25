@@ -40,12 +40,8 @@ class MovimientoControllerTest {
 
     @Test
     void testAgregarMovimiento() throws Exception {
-        Movimiento movimiento = new Movimiento(null, null, null, 0, null);
-        movimiento.setNumeroCuenta("123");
-        movimiento.setTipo("crédito");
-        movimiento.setValor(1000.0);
-        movimiento.setFecha(LocalDate.parse("2024-02-16"));
-        when(movimientoService.agregarMovimiento(eq("123"), any(Movimiento.class)))
+        Movimiento movimiento = new Movimiento("123", "crédito", 1000.0, LocalDate.parse("2024-02-16"));
+        when(movimientoService.actualizarMovimiento(eq("123"), any(Movimiento.class)))
                 .thenReturn("Movimiento registrado");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/movimientos")
@@ -58,8 +54,8 @@ class MovimientoControllerTest {
     @Test
     void testObtenerTodos() throws Exception {
         List<Movimiento> movimientos = Arrays.asList(
-                new Movimiento("crédito", 500.0, "2024-02-16"),
-                new Movimiento("débito", -200.0, "2024-02-17")
+                new Movimiento("123", "crédito", 500.0, LocalDate.parse("2024-02-16")),
+                new Movimiento("456", "débito", -200.0, LocalDate.parse("2024-02-17"))
         );
 
         when(movimientoService.obtenerTodos()).thenReturn(movimientos);
@@ -74,8 +70,8 @@ class MovimientoControllerTest {
     @Test
     void testObtenerMovimientosPorNumeroCuenta_ConResultados() throws Exception {
         List<Movimiento> movimientos = Arrays.asList(
-                new Movimiento("crédito", 500.0, "2024-02-16"),
-                new Movimiento("débito", -200.0, "2024-02-17")
+                new Movimiento("123", "crédito", 500.0, LocalDate.parse("2024-02-16")),
+                new Movimiento("123", "débito", -200.0, LocalDate.parse("2024-02-17"))
         );
 
         when(movimientoService.buscarPorNumeroCuenta("123")).thenReturn(movimientos);
@@ -96,14 +92,11 @@ class MovimientoControllerTest {
 
     @Test
     void testActualizarMovimiento_Exitoso() throws Exception {
-        Movimiento movimientoActualizado = new Movimiento(null, null, null, 0, null);
-        movimientoActualizado.setTipo("débito");
-        movimientoActualizado.setValor(300.0);
-        movimientoActualizado.setFecha(LocalDate.parse("2024-02-16"));
-        when(movimientoService.actualizarMovimiento(eq(1L), any(Movimiento.class)))
+        Movimiento movimientoActualizado = new Movimiento("123", "débito", 300.0, LocalDate.parse("2024-02-16"));
+        when(movimientoService.actualizarMovimiento(eq("123"), any(Movimiento.class)))
                 .thenReturn("Movimiento actualizado");
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/movimientos/1")
+        mockMvc.perform(MockMvcRequestBuilders.put("/movimientos/123")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(movimientoActualizado)))
                 .andExpect(status().isOk())
@@ -112,14 +105,11 @@ class MovimientoControllerTest {
 
     @Test
     void testActualizarMovimiento_NoEncontrado() throws Exception {
-        Movimiento movimientoActualizado = new Movimiento(null, null, null, 0, null);
-        movimientoActualizado.setTipo("débito");
-        movimientoActualizado.setValor(300.0);
-        movimientoActualizado.setFecha(LocalDate.parse("2024-02-16"));
-        when(movimientoService.actualizarMovimiento(eq(99L), any(Movimiento.class)))
+        Movimiento movimientoActualizado = new Movimiento("999", "débito", 300.0, LocalDate.parse("2024-02-16"));
+        when(movimientoService.actualizarMovimiento(eq("999"), any(Movimiento.class)))
                 .thenReturn("Error: Movimiento no encontrado");
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/movimientos/99")
+        mockMvc.perform(MockMvcRequestBuilders.put("/movimientos/999")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(movimientoActualizado)))
                 .andExpect(status().isBadRequest())

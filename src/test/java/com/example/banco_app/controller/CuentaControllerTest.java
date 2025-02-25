@@ -41,9 +41,8 @@ class CuentaControllerTest {
 
     @Test
     void testObtenerCuentas() throws Exception {
-    	Cuenta cuenta1 = new Cuenta("123", 1000.0, 1L);
-    	Cuenta cuenta2 = new Cuenta("456", 2000.0, 2L);
-
+        Cuenta cuenta1 = new Cuenta("123", 1000.0, 1L);
+        Cuenta cuenta2 = new Cuenta("456", 2000.0, 2L);
         when(cuentaService.obtenerTodasLasCuentas()).thenReturn(Arrays.asList(cuenta1, cuenta2));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/cuentas"))
@@ -54,9 +53,7 @@ class CuentaControllerTest {
 
     @Test
     void testObtenerCuenta_Existe() throws Exception {
-    	Cuenta cuenta = new Cuenta("123", 1000.0, 1L);
-
-
+        Cuenta cuenta = new Cuenta("123", 1000.0, 1L);
         when(cuentaService.obtenerCuentaPorNumero("123")).thenReturn(Optional.of(cuenta));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/cuentas/123"))
@@ -74,8 +71,7 @@ class CuentaControllerTest {
 
     @Test
     void testCrearCuenta() throws Exception {
-    	Cuenta cuenta = new Cuenta("456", 2000.0, 1L);
-
+        Cuenta cuenta = new Cuenta("456", 2000.0, 1L);
         when(cuentaService.crearCuenta(any(Cuenta.class))).thenReturn(ResponseEntity.ok("Cuenta creada exitosamente"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/cuentas")
@@ -87,18 +83,24 @@ class CuentaControllerTest {
 
     @Test
     void testActualizarSaldo_Exito() throws Exception {
-        when(cuentaService.actualizarSaldo("123", 5000.0)).thenReturn(true);
+        when(cuentaService.actualizarSaldo("123", 5000.0)).thenReturn(ResponseEntity.ok("Saldo actualizado con éxito."));
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/cuentas/123?saldo=5000"))
-               .andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.put("/cuentas/123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Cuenta("123", 5000.0, 1L))))
+               .andExpect(status().isOk())
+               .andExpect(content().string("Saldo actualizado con éxito."));
     }
 
     @Test
     void testActualizarSaldo_Fallo() throws Exception {
-        when(cuentaService.actualizarSaldo("999", 5000.0)).thenReturn(false);
+        when(cuentaService.actualizarSaldo("999", 5000.0)).thenReturn(ResponseEntity.status(404).body("Error: Cuenta no encontrada."));
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/cuentas/999?saldo=5000"))
-               .andExpect(status().isNotFound());
+        mockMvc.perform(MockMvcRequestBuilders.put("/cuentas/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Cuenta("999", 5000.0, 1L))))
+               .andExpect(status().isNotFound())
+               .andExpect(content().string("Error: Cuenta no encontrada."));
     }
 
     @Test
@@ -106,7 +108,8 @@ class CuentaControllerTest {
         when(cuentaService.eliminarCuenta("123")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/cuentas/123"))
-               .andExpect(status().isOk());
+               .andExpect(status().isOk())
+               .andExpect(content().string("Cuenta eliminada correctamente."));
     }
 
     @Test
@@ -114,6 +117,7 @@ class CuentaControllerTest {
         when(cuentaService.eliminarCuenta("999")).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/cuentas/999"))
-               .andExpect(status().isNotFound());
+               .andExpect(status().isNotFound())
+               .andExpect(content().string("Error: Cuenta no encontrada."));
     }
 }

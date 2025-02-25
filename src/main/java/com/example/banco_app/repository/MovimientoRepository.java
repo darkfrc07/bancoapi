@@ -1,9 +1,11 @@
 package com.example.banco_app.repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -30,7 +32,7 @@ public class MovimientoRepository {
         String sql = "INSERT INTO movimientos (numero_cuenta, tipo, fecha, valor) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update((PreparedStatementCreator) connection -> {
+        jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, numeroCuenta);
             stmt.setString(2, movimiento.getTipo());
@@ -39,9 +41,17 @@ public class MovimientoRepository {
             return stmt;
         }, keyHolder);
 
-        return keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
+        if (keyHolder.getKey() != null) {
+            return keyHolder.getKey().longValue();
+        }
+        return null;
     }
+    
+    public List<Movimiento> obtenerMovimientosEntreFechas(String cuentaId, LocalDate fechaInicio, LocalDate fechaFin) {
+        String sql = "SELECT * FROM movimientos WHERE numero_cuenta = ? AND fecha BETWEEN ? AND ?";
 
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Movimiento.class), cuentaId, fechaInicio, fechaFin);
+    }
     public List<Movimiento> buscarPorNumeroCuenta(String numeroCuenta) {
         String sql = "SELECT id, numero_cuenta, tipo, fecha, valor FROM movimientos WHERE numero_cuenta = ?";
         return jdbcTemplate.query(sql, new MovimientoMapper(), numeroCuenta);
@@ -70,4 +80,6 @@ public class MovimientoRepository {
             );
         }
     }
+    
+    
 }

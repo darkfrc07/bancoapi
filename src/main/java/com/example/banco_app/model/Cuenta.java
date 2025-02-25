@@ -13,7 +13,7 @@ public class Cuenta {
 
     @NotNull(message = "El ID del cliente es obligatorio")
     private Long idCliente;
-
+    
     public Cuenta() {}
 
     public Cuenta(String numero, double saldo, Long idCliente) {

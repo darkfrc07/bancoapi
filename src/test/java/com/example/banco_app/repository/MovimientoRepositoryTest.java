@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -36,21 +38,27 @@ class MovimientoRepositoryTest {
 
     @Test
     void testAgregarMovimiento() {
-        Movimiento movimiento = new Movimiento(null, "DEBITO", LocalDate.now(), 500.0, "12345");
-        
+        Movimiento movimiento = new Movimiento(null, "DEBITO", LocalDate.of(2024, 2, 24), 500.0, "12345");
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
-        when(jdbcTemplate.update(any(), any(KeyHolder.class))).thenAnswer(invocation -> {
-            keyHolder.getKeyList().add(java.util.Map.of("id", 1L)); 
-            return 1;
+        when(jdbcTemplate.update(any(PreparedStatementCreator.class), any(KeyHolder.class)))
+        .thenAnswer(invocation -> {
+            KeyHolder keyHolderMock = invocation.getArgument(1); 
+            keyHolderMock.getKeyList().add(java.util.Map.of("id", 1L)); 
+            return 1; 
         });
+
 
         Long id = movimientoRepository.agregarMovimiento("12345", movimiento);
 
         assertNotNull(id);
         assertEquals(1L, id);
-        verify(jdbcTemplate, times(1)).update(any(), any(KeyHolder.class));
+
+        ArgumentCaptor<PreparedStatementCreator> statementCaptor = ArgumentCaptor.forClass(PreparedStatementCreator.class);
+        verify(jdbcTemplate, times(1)).update(statementCaptor.capture(), any(KeyHolder.class));
     }
+
 
     @Test
     void testObtenerMovimientos() {

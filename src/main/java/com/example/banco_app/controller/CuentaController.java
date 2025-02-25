@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -40,9 +39,9 @@ public class CuentaController {
 
     @PutMapping("/{numero}")
     public ResponseEntity<String> actualizarSaldo(@PathVariable String numero, @RequestBody Cuenta cuenta) {
-        boolean actualizado = cuentaService.actualizarSaldo(numero, cuenta.getSaldo());
+        ResponseEntity<String> respuesta = cuentaService.actualizarSaldo(numero, cuenta.getSaldo());
 
-        return actualizado 
+        return respuesta.getStatusCode() == HttpStatus.OK 
             ? ResponseEntity.ok("Saldo actualizado con éxito.") 
             : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Cuenta no encontrada.");
     }

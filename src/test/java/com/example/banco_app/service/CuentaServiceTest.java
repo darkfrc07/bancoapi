@@ -90,20 +90,20 @@ class CuentaServiceTest {
     @Test
     void testActualizarSaldo_Exito() {
         when(cuentaRepository.actualizarCuenta("123456", 700.0)).thenReturn(1);
-        when(cuentaRepository.buscarPorNumero("123456")).thenReturn(Optional.of(new Cuenta("123456", 700.0, 1L)));
 
-        Optional<Cuenta> resultado = Optional.empty();
+        var response = cuentaService.actualizarSaldo("123456", 700.0);
 
-        assertTrue(resultado.isPresent());
-        assertEquals(700.0, resultado.get().getSaldo());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Saldo actualizado con éxito.", response.getBody());
         verify(cuentaRepository, times(1)).actualizarCuenta("123456", 700.0);
     }
 
     @Test
     void testActualizarSaldo_FalloPorSaldoNegativo() {
-        Optional<Cuenta> resultado = Optional.empty();
+        var response = cuentaService.actualizarSaldo("123456", -50.0);
 
-        assertFalse(resultado.isPresent());
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Error: No se puede tener saldo negativo.", response.getBody());
         verify(cuentaRepository, never()).actualizarCuenta(anyString(), anyDouble());
     }
 
@@ -111,11 +111,13 @@ class CuentaServiceTest {
     void testActualizarSaldo_CuentaNoEncontrada() {
         when(cuentaRepository.actualizarCuenta("999999", 500.0)).thenReturn(0);
 
-        Optional<Cuenta> resultado = Optional.empty();
+        var response = cuentaService.actualizarSaldo("999999", 500.0);
 
-        assertFalse(resultado.isPresent());
+        assertEquals(500, response.getStatusCodeValue());
+        assertEquals("Error: No se pudo actualizar el saldo.", response.getBody());
         verify(cuentaRepository, times(1)).actualizarCuenta("999999", 500.0);
     }
+
 
     @Test
     void testEliminarCuenta_Exito() {

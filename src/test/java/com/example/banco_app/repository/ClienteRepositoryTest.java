@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.example.banco_app.model.Cliente;
@@ -40,19 +42,21 @@ class ClienteRepositoryTest {
 
     @Test
     void agregarCliente_DebeRetornarClienteConId() {
-        KeyHolder mockKeyHolder = mock(KeyHolder.class);
-        when(mockKeyHolder.getKey()).thenReturn(1L);
+        KeyHolder keyHolder = new GeneratedKeyHolder(); // Usar KeyHolder real
 
-        when(jdbcTemplate.update(any(PreparedStatementCreator.class), any(KeyHolder.class)))
-                .thenReturn(1);
+        doAnswer(invocation -> {
+            KeyHolder keyHolderArg = invocation.getArgument(1);
+            keyHolderArg.getKeyList().add(Map.of("id", 1L)); // Simular la generación de clave
+            return 1;
+        }).when(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
 
         Cliente resultado = clienteRepository.agregarCliente(new Cliente(null, "Juan Pérez", "Calle 123", "123456789"));
 
-        assertNotNull(resultado.getId());
+        assertNotNull(resultado.getId(), "El ID del cliente no debería ser nulo");
         assertEquals(1L, resultado.getId());
-
-        verify(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
     }
+
+
 
     @Test
     void obtenerClientes_DebeRetornarListaClientes() {
@@ -128,4 +132,40 @@ class ClienteRepositoryTest {
 
         assertFalse(resultado);
     }
+    
+    @Test
+    void asignarCuenta_CuandoExitoso_DebeRetornarTrue() {
+        when(jdbcTemplate.update(anyString(), anyLong(), anyLong())).thenReturn(1);
+
+        boolean resultado = clienteRepository.asignarCuenta(1L, 100L);
+
+        assertTrue(resultado);
+        verify(jdbcTemplate).update(anyString(), eq(1L), eq(100L));
+    }
+
+    @Test
+    void asignarCuenta_CuandoFalla_DebeRetornarFalse() {
+        when(jdbcTemplate.update(anyString(), anyLong(), anyLong())).thenReturn(0);
+
+        boolean resultado = clienteRepository.asignarCuenta(1L, 100L);
+
+        assertFalse(resultado);
+    }
+
+    @Test
+    void asignarCuenta_CuandoExcepcion_DebeLanzarRuntimeException() {
+        when(jdbcTemplate.update(anyString(), anyLong(), anyLong()))
+                .thenThrow(new DataAccessException("Error de base de datos") {});
+
+        assertThrows(RuntimeException.class, () -> clienteRepository.asignarCuenta(1L, 100L));
+    }
+
+    @Test
+    void agregarCliente_CuandoExcepcion_DebeLanzarDataAccessException() {
+        when(jdbcTemplate.update(any(PreparedStatementCreator.class), any(KeyHolder.class)))
+                .thenThrow(new DataAccessException("Error de base de datos") {});
+
+        assertThrows(DataAccessException.class, () -> clienteRepository.agregarCliente(cliente));
+    }
+
 }
