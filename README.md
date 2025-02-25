@@ -36,54 +36,99 @@ Construir y ejecutar el proyecto
 mvn clean install
 mvn spring-boot:run
 
+SCRIPTS CREATE TABLE
+CREATE TABLE Cliente (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    direccion VARCHAR(255),
+    telefono VARCHAR(15) NOT NULL
+); 
+
+CREATE TABLE Cuenta (
+    numero VARCHAR(20) PRIMARY KEY,
+    saldo DECIMAL(15,2) NOT NULL CHECK (saldo >= 0),
+    id_cliente BIGINT UNSIGNED NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id) ON DELETE CASCADE
+);
+
+CREATE TABLE Movimiento (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    numero_cuenta VARCHAR(20) NOT NULL,
+    tipo ENUM('crédito', 'débito') NOT NULL,
+    fecha DATE NOT NULL DEFAULT (CURRENT_DATE),
+    valor DECIMAL(15,2) NOT NULL CHECK (valor > 0),
+    FOREIGN KEY (numero_cuenta) REFERENCES Cuenta(numero) ON DELETE CASCADE
+);
+
+
+Documentacion en POSTMAN: https://documenter.getpostman.com/view/33439515/2sAYdcssZp
+Para POSTMAN
 El backend correrá en http://localhost:8080.
 
- Endpoints disponibles
- POST	/clientes	Crear un cliente
-GET	/clientes/{id}	Obtener un cliente por ID
-GET	/cuentas/{id}	Obtener cuenta por ID
+-------------- Endpoints disponibles---------------
+
+cliente--------------------------------------------
+POST	/cliente Crear un cliente
+GET	/cliente/{id}	Obtener un cliente por ID
+GET /cliente Obtiene lista de todos los clientes
+PUT /cliente/{id} Actusliza cliente del id 
+DELETE /cliente/{id} Elimina cliente del id 
+---------------------------------------------------
+
+cuentas---------------------------------------------
+POST	/cuentas	Registrar una cuenta
+GET	/cuentas/{numeroCuenta}	Obtener cuenta por numero
+GET	/cuentas	Obtener todas las cuentas
+PUT /cuentas/{numeroCuenta} Actualiza cuenta coh el numero de cuenta 
+DELETE /cuentas/{numeroCuenta} Elimina cuenta coh el numero de cuenta 
+---------------------------------------------------------------------
+
+movimientos --------------------------------------------------------
 POST	/movimientos	Registrar un movimiento
-GET	/movimientos/reporte	Generar reporte por fechas
+GET	/movimientos Obtiene todos los movimientos
+GET	/movimientos/cuenta/{numeroCuenta} Obtiene movimientos de la cuenta con el numero de cuenta
+-------------------------------------------------------------------------------------------------
 
-https://documenter.getpostman.com/view/33439515/2sAYdcssZp
-Para POSTMAN
-Método	URL:
-CLIENTES
-
+Métodos	URL:
+cliente:
 GET:http://localhost:8080/cliente 
-POST: http://localhost:8080/cliente 
-POST CON BODY
+POST: http://localhost:8080/cliente
+PUT: http://localhost:8080/cliente/24   ---> id cliente a actualizar/cambiar con body
+DELETE http://localhost:8080/cliente/24 ---> id cliente a eliminar
 
-PUT: http://localhost:8080/cliente/id_cliente
-PUT CON BODY
-DELETE http://localhost:8080/cliente/id_cliente
-
+BODY
 {
   "nombre": "Juan Pérez",
   "direccion": "Calle 123",
   "telefono": "123456789"
 }
+-------------------------------------------------------------------------------------------------
 
-CUENTAS
+cuentas
 
-GET http://localhost:8080/cuentas/numeroCuenta
+GET http://localhost:8080/cuentas
 POST http://localhost:8080/cuentas
 PUT http://localhost:8080/cuentas/numeroCuenta
+DELETE http://localhost:8080/cuentas/numeroCuenta
 
+BODY
 {
   "numero": "123456789",
   "saldo": 1000.0,
   "clienteId": 1
 }
+--------------------------------------------------------
 
-MOVIMIENTOS
+movimientos
 
-http://localhost:8080/movimientos
-
+POST http://localhost:8080/movimientos
+GET http://localhost:8080/movimientos
+GET http://localhost:8080/movimientos/cuenta/numeroCuenta
 {
-  "tipo": "crédito",
-  "valor": 500.0,
-  "fecha": "2024-02-16"
+    "numeroCuenta": "12345",
+    "tipo": "DEBITO",
+    "valor": 100.00,
+    //"fecha": "2024-02-16" Sin fecha se pone la actual
 }
 
 Pruebas
