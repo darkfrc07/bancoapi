@@ -55,7 +55,7 @@ class MovimientoControllerTest {
     void testObtenerTodos() throws Exception {
         List<Movimiento> movimientos = Arrays.asList(
                 new Movimiento("123", "crédito", 500.0, LocalDate.parse("2024-02-16")),
-                new Movimiento("456", "débito", -200.0, LocalDate.parse("2024-02-17"))
+                new Movimiento("456", "débito", 200.0, LocalDate.parse("2024-02-17"))
         );
 
         when(movimientoService.obtenerTodos()).thenReturn(movimientos);
@@ -71,7 +71,7 @@ class MovimientoControllerTest {
     void testObtenerMovimientosPorNumeroCuenta_ConResultados() throws Exception {
         List<Movimiento> movimientos = Arrays.asList(
                 new Movimiento("123", "crédito", 500.0, LocalDate.parse("2024-02-16")),
-                new Movimiento("123", "débito", -200.0, LocalDate.parse("2024-02-17"))
+                new Movimiento("123", "débito", 200.0, LocalDate.parse("2024-02-17"))
         );
 
         when(movimientoService.buscarPorNumeroCuenta("123")).thenReturn(movimientos);

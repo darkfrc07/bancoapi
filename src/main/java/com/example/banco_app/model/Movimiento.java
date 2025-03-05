@@ -20,16 +20,16 @@ public class Movimiento {
     @Min(value = 0, message = "El valor del movimiento no puede ser negativo")
     private double valor;
 
-    @NotNull(message = "El número de cuenta es obligatorio")
+    @NotBlank(message = "El número de cuenta es obligatorio")
     private String numeroCuenta;
 
     public Movimiento() {}
 
     public Movimiento(Long id, String tipo, LocalDate fecha, double valor, String numeroCuenta) {
         this.id = id;
-        this.setTipo(tipo);  // Usa el setter para validar
+        this.tipo = tipo;
         this.fecha = (fecha != null) ? fecha : LocalDate.now();
-        this.setValor(valor);  // Usa el setter para validar
+        this.valor = valor;
         this.numeroCuenta = numeroCuenta;
     }
 
@@ -46,10 +46,10 @@ public class Movimiento {
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) {
-        if (tipo == null || tipo.isBlank()) {
+        if (tipo == null || tipo.trim().isEmpty()) {
             throw new IllegalArgumentException("El tipo de movimiento no puede ser nulo o vacío");
         }
-        this.tipo = TipoMovimiento.fromString(tipo).name(); // Guarda siempre en mayúsculas
+        this.tipo = tipo;
     }
 
     public LocalDate getFecha() { return fecha; }
@@ -58,7 +58,7 @@ public class Movimiento {
     }
 
     public double getValor() { return valor; }
-    public void setValor(double valor) {
+    public void setValor(double valor) { 
         if (valor < 0) {
             throw new IllegalArgumentException("El valor del movimiento no puede ser negativo");
         }
@@ -66,8 +66,8 @@ public class Movimiento {
     }
 
     public String getNumeroCuenta() { return numeroCuenta; }
-    public void setNumeroCuenta(String numeroCuenta) {
-        if (numeroCuenta == null || numeroCuenta.isBlank()) {
+    public void setNumeroCuenta(String numeroCuenta) { 
+        if (numeroCuenta == null || numeroCuenta.trim().isEmpty()) {
             throw new IllegalArgumentException("El número de cuenta no puede ser nulo o vacío");
         }
         this.numeroCuenta = numeroCuenta;

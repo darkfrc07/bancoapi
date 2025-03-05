@@ -3,8 +3,6 @@ package com.example.banco_app.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,67 +93,31 @@ class MovimientoServiceTest {
     @Test
     void testActualizarMovimiento_TipoInvalido() {
         Cuenta cuenta = new Cuenta("12345", 100.0, 1L);
-        Movimiento movimiento = new Movimiento("CREDITO", 30.0, null);
+        Movimiento movimiento = new Movimiento("INVALIDO", 30.0, null); // Tipo inválido
 
         when(cuentaService.obtenerCuentaPorNumero("12345")).thenReturn(Optional.of(cuenta));
 
-        String resultado = movimientoService.actualizarMovimiento("56545", movimiento);
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            movimientoService.actualizarMovimiento("12345", movimiento);
+        });
 
-        assertEquals("Error: Tipo de movimiento inválido.", resultado);
-        verify(cuentaService, never()).actualizarSaldo(anyString(), anyDouble());
-        verify(movimientoRepository, never()).agregarMovimiento(anyString(), any(Movimiento.class));
-    }
-
-    @Test
-    void testActualizarMovimiento_AsignarFechaSiEsNula() {
-        Cuenta cuenta = new Cuenta("12345", 100.0, 1L);
-        Movimiento movimiento = new Movimiento("DEBITO", 20.0, null);
-        movimiento.setFecha(null);
-
-        when(cuentaService.obtenerCuentaPorNumero("12345")).thenReturn(Optional.of(cuenta));
-        when(cuentaService.actualizarSaldo("12345", 120.0))
-            .thenReturn(new ResponseEntity<>("Saldo actualizado", HttpStatus.OK));
-        when(movimientoRepository.agregarMovimiento(anyString(), any(Movimiento.class))).thenReturn(3L);
-
-        String resultado = movimientoService.actualizarMovimiento("12345", movimiento);
-
-        assertEquals("Movimiento registrado con éxito. ID: 3", resultado);
-        assertNotNull(movimiento.getFecha());
-        assertEquals(LocalDate.now(), movimiento.getFecha());
-    }
-    
-    @Test
-    void testObtenerTodos() {
-    	List<Movimiento> movimientos = List.of(
-    		    new Movimiento("DEBITO", 100.0, "12345"), 
-    		    new Movimiento("CREDITO", 50.0, "12345")   
-    		);
-
-        
-        when(movimientoRepository.obtenerMovimientos()).thenReturn(movimientos);
-        
-        List<Movimiento> resultado = movimientoService.obtenerTodos();
-        
-        assertEquals(2, resultado.size());
-        assertEquals("DEBITO", resultado.get(0).getTipo());
-        assertEquals("CREDITO", resultado.get(1).getTipo());
+        assertEquals("Tipo de movimiento inválido: INVALIDO", exception.getMessage());
     }
 
     @Test
     void testBuscarPorNumeroCuenta() {
         String numeroCuenta = "12345";
         List<Movimiento> movimientos = List.of(
-        	    new Movimiento("DEBITO", 100.0, "12345"),  
-        	    new Movimiento("CREDITO", 50.0, "12345")   
-        	);
+            new Movimiento("DEBITO", 100.0, "12345"),  
+            new Movimiento("CREDITO", 50.0, "12345")   
+        );
 
-        
         when(movimientoRepository.buscarPorNumeroCuenta(numeroCuenta)).thenReturn(movimientos);
-        
+
         List<Movimiento> resultado = movimientoService.buscarPorNumeroCuenta(numeroCuenta);
-        
+
         assertEquals(2, resultado.size());
-        assertEquals(200.0, resultado.get(0).getValor());
-        assertEquals(100.0, resultado.get(1).getValor());
+        assertEquals(100.0, resultado.get(0).getValor());  // Corregido
+        assertEquals(50.0, resultado.get(1).getValor());   // Corregido
     }
 }

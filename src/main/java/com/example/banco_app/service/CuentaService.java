@@ -30,8 +30,12 @@ public class CuentaService {
     }
 
     public ResponseEntity<String> crearCuenta(Cuenta cuenta) {
-        Optional<Cuenta> cuentaExistente = cuentaRepository.buscarPorNumero(cuenta.getNumero());
+        if (cuenta.getNumero() == null || cuenta.getNumero().trim().isEmpty()) {
+            log.warn("Intento de crear cuenta con número vacío.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El número de cuenta es obligatorio.");
+        }
 
+        Optional<Cuenta> cuentaExistente = cuentaRepository.buscarPorNumero(cuenta.getNumero());
         if (cuentaExistente.isPresent()) {
             log.warn("Intento de crear cuenta con número ya existente: {}", cuenta.getNumero());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El número de cuenta ya existe.");
@@ -46,6 +50,7 @@ public class CuentaService {
         log.info("Cuenta creada con éxito: Número={}, Saldo={}", cuenta.getNumero(), cuenta.getSaldo());
         return ResponseEntity.status(HttpStatus.CREATED).body("Cuenta creada exitosamente.");
     }
+
 
     public ResponseEntity<String> actualizarSaldo(String numero, double nuevoSaldo) {
         if (nuevoSaldo < 0) {

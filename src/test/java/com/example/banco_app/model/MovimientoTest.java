@@ -33,7 +33,7 @@ class MovimientoTest {
 
     @Test
     void testMovimientoSetters() {
-        Movimiento movimiento = new Movimiento(null, null, null, 0, null);
+        Movimiento movimiento = new Movimiento(null, "CREDITO", null, 0, null);
         movimiento.setId(2L);
         movimiento.setTipo("CREDITO");
         movimiento.setFecha(LocalDate.of(2024, 3, 10));
@@ -49,20 +49,20 @@ class MovimientoTest {
 
     @Test
     void testValidacionMovimientoInvalido() {
-        Movimiento movimiento = new Movimiento("", -500.0, "");
-
+        Movimiento movimiento = new Movimiento("", -500.0, ""); 
         Set<ConstraintViolation<Movimiento>> violations = validator.validate(movimiento);
 
-        assertEquals(3, violations.size());
+        assertEquals(3, violations.size()); 
     }
+
 
     @Test
     void testValorNegativoLanzaExcepcion() {
-        Movimiento movimiento = new Movimiento(null, null, null, 0, null);
+        Movimiento movimiento = new Movimiento(null, "DEBITO", null, 0, null); 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             movimiento.setValor(-200);
         });
 
         assertEquals("El valor del movimiento no puede ser negativo", exception.getMessage());
     }
-}
+  }

@@ -3,6 +3,8 @@ package com.example.banco_app.controller;
 import com.example.banco_app.model.Cuenta;
 import com.example.banco_app.service.CuentaService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
@@ -33,7 +35,7 @@ public class CuentaController {
     }
 
     @PostMapping
-    public ResponseEntity<String> crearCuenta(@RequestBody Cuenta cuenta) {
+    public ResponseEntity<String> crearCuenta(@Valid @RequestBody Cuenta cuenta) {
         return cuentaService.crearCuenta(cuenta);
     }
 

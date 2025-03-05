@@ -27,7 +27,7 @@ class CuentaTest {
 
         assertEquals("123456789", cuenta.getNumero());
         assertEquals(1000.0, cuenta.getSaldo());
-        assertEquals(Long.valueOf(1), cuenta.getClienteId());
+        assertEquals(Long.valueOf(1), cuenta.getIdCliente());
     }
 
     @Test
@@ -35,11 +35,11 @@ class CuentaTest {
         Cuenta cuenta = new Cuenta();
         cuenta.setNumero("987654321");
         cuenta.setSaldo(5000.0);
-        cuenta.setClienteId(2L);
+        cuenta.setIdCliente(2L);
 
         assertEquals("987654321", cuenta.getNumero());
         assertEquals(5000.0, cuenta.getSaldo());
-        assertEquals(Long.valueOf(2), cuenta.getClienteId());
+        assertEquals(Long.valueOf(2), cuenta.getIdCliente());
     }
 
     @Test

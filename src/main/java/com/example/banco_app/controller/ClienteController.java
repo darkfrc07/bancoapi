@@ -14,6 +14,7 @@ import com.example.banco_app.service.ClienteService;
 
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = "http://localhost:4200") 
 @RestController
 @RequestMapping("/cliente")
 public class ClienteController {
